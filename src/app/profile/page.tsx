@@ -21,8 +21,8 @@ export default async function Profile() {
       <Header />
       <main>
         <div className="mx-auto max-w-md rounded-md border-2 border-border p-4">
-          <h1 className="mb-6 text-xl">{session.user.email}</h1>
-          <ul>
+          <h1 className="text-xl">{session.user.email}</h1>
+          <ul className="my-6">
             {!!memories.length ? (
               memories.map((memory) => (
                 <li
@@ -42,6 +42,7 @@ export default async function Profile() {
               <p>No memories yet</p>
             )}
           </ul>
+          <Anchor href="/memories/create">Submit A Memory</Anchor>
         </div>
       </main>
     </>
