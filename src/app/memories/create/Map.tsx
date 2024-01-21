@@ -34,7 +34,6 @@ export default function Map({
         if (!mapRef.current) throw Error("Cant get map reference");
         mapRef.current.getStreetView().setVisible(true);
         mapRef.current.getStreetView().setVisible(false);
-
         mapRef.current.addListener("bounds_changed", () => {
           updateMemoryData({
             long: mapRef.current?.getCenter()?.lng(),

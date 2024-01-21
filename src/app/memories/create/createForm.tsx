@@ -18,8 +18,9 @@ import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { Loader } from "@googlemaps/js-api-loader";
 
 const Map = dynamic(() => import("./Map").then((r) => r.default), {
   ssr: false,
@@ -53,6 +54,48 @@ export type MapMemoryData = {
 };
 
 export default function CreateForm() {
+  const [searchValue, setSearchValue] = useState("");
+
+  const loader = new Loader({
+    apiKey: "AIzaSyALnd9Vz1KNL9vGgRYnlL_lyB9yQRqyzVI", // Replace with your API key
+    version: "weekly",
+  });
+
+  const onSearchClicked = () => {
+    // Use the searchValue as needed
+    console.log("Search value:", searchValue);
+
+    const placesApiUrl = (place: string) =>
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${place}&key=AIzaSyALnd9Vz1KNL9vGgRYnlL_lyB9yQRqyzVI`;
+
+    fetch(placesApiUrl(searchValue), {
+      method: "GET",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      }    
+    }).then((response) => response.json())
+      .then((data) => {
+        const results = data.results;
+        const status = data.status;
+
+        if (status !== "OK" || !results) {
+          console.error(`Error fetching places for ${searchValue}`);
+          return;
+        }
+
+        if (results.length === 0) {
+          console.error(`No places found based on searchValue: ${searchValue}`);
+          return;
+        }
+
+        // Handle the results
+        console.log("Results:", results);
+      })
+      .catch((error) => {
+        console.error("Error fetching places:", error);
+      });
+  };
   const mapMemoryDataRef = useRef<MapMemoryData>();
   const updateMemoryData = (data: MapMemoryData) => {
     mapMemoryDataRef.current = data;
@@ -119,6 +162,19 @@ export default function CreateForm() {
             </FormItem>
           )}
         />
+
+        <FormItem>
+          <FormLabel>Place</FormLabel>
+          <div className="flex space-x-2">
+            <Input
+              placeholder="Insert place to help specify the location"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+            <Button onClick={onSearchClicked}>Search</Button>
+          </div>
+        </FormItem>
+
         <Map updateMemoryData={updateMemoryData} />
         <Button>Submit</Button>
       </form>
