@@ -26,13 +26,13 @@ export default function RootLayout({
     <html lang="en" style={{ colorScheme: "dark" }} className="dark">
       <Head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link
           href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
           rel="stylesheet"
         />
       </Head>
-      <body className={`p-4 font-sans ${inter.variable}`}>
+      <body className={`font-sans p-4 ${inter.variable}`}>
         <TRPCReactProvider>{children}</TRPCReactProvider>
         <Toaster />
       </body>

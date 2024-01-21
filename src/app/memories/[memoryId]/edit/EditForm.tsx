@@ -85,6 +85,7 @@ export function EditForm({
       const { Map } = (await google.maps.importLibrary(
         "maps",
       )) as google.maps.MapsLibrary;
+      // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
       mapRef.current = new Map(document.getElementById("map") as HTMLElement, {
         center: center,
         zoom: 8,
@@ -142,10 +143,7 @@ export function EditForm({
       strictBounds: false,
     };
 
-    const autocomplete = new google.maps.places.Autocomplete(
-      inputRef.current,
-      options,
-    );
+    new google.maps.places.Autocomplete(inputRef.current!, options);
   };
 
   const onSearchClicked = async () => {
@@ -174,7 +172,7 @@ export function EditForm({
         }
 
         mapRef.current.setCenter(
-          new google.maps.LatLng(lat || center.lat, lng || center.lng),
+          new google.maps.LatLng(lat ?? center.lat, lng ?? center.lng),
         );
       } else {
         console.error("Error in textSearch:", status);

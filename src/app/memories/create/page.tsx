@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 import { Header } from "~/components/header";
 import { getServerAuthSession } from "~/server/auth";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
 import CreateForm from "./createForm";
 
 export default async function Create() {

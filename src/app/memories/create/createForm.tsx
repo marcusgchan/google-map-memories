@@ -17,15 +17,10 @@ import {
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Loader } from "@googlemaps/js-api-loader";
 import { env } from "~/env";
-
-const Map = dynamic(() => import("./Map").then((r) => r.default), {
-  ssr: false,
-});
 
 const mapMemorySchema = z.object({
   position: z.object({
@@ -85,13 +80,11 @@ export default function CreateForm() {
       const { Map } = (await google.maps.importLibrary(
         "maps",
       )) as google.maps.MapsLibrary;
-      mapRef.current = new Map(
-        document.getElementById("map") as HTMLElement,
-        {
-          center: center,
-          zoom: 8,
-        },
-      );
+      // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
+      mapRef.current = new Map(document.getElementById("map") as HTMLElement, {
+        center: center,
+        zoom: 8,
+      });
 
       mapRef.current.getStreetView().setVisible(true);
       mapRef.current.getStreetView().setVisible(false);
@@ -103,7 +96,7 @@ export default function CreateForm() {
           lat: mapRef.current?.getStreetView()?.getLocation()?.latLng?.lat(),
         });
       });
-      
+
       mapRef.current.getStreetView().addListener("zoom_changed", () => {
         // console.log("zoom_changed");
         updateMemoryZoom({
@@ -119,7 +112,6 @@ export default function CreateForm() {
           heading: mapRef.current?.getStreetView().getPov().heading,
         });
       });
- 
     });
   }, []);
 
@@ -138,44 +130,46 @@ export default function CreateForm() {
       strictBounds: false,
     };
 
-    const autocomplete = new google.maps.places.Autocomplete(
-      inputRef.current,
+    new google.maps.places.Autocomplete(
+      // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
+      inputRef.current as HTMLInputElement,
       options,
     );
   };
 
   const onSearchClicked = async () => {
-
     if (!mapRef.current) {
       return;
     }
     // const { Map } = (await google.maps.importLibrary(
     //   "maps",
     // )) as google.maps.MapsLibrary;
-    
+
     const placesService = new google.maps.places.PlacesService(mapRef.current);
-    
+
     const request = {
-      query: inputRef.current?.value
+      query: inputRef.current?.value,
     };
-    
+
     placesService.textSearch(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-        const location = results?.[0]?.geometry?.location
+        const location = results?.[0]?.geometry?.location;
 
-        const lat = location?.lat()
-        const lng = location?.lng()
+        const lat = location?.lat();
+        const lng = location?.lng();
 
         if (!mapRef.current) {
           return;
         }
 
-        mapRef.current.setCenter(new google.maps.LatLng(lat || center.lat, lng || center.lng))
+        mapRef.current.setCenter(
+          new google.maps.LatLng(lat ?? center.lat, lng ?? center.lng),
+        );
       } else {
-        console.error('Error in textSearch:', status);
+        console.error("Error in textSearch:", status);
       }
     });
-  }
+  };
 
   const mapMemoryDataRef = useRef<MapMemoryData>({
     position: undefined,
@@ -218,7 +212,7 @@ export default function CreateForm() {
   function onSubmit(values: z.infer<typeof createFormSchema>) {
     const res = mapMemorySchema.safeParse(mapMemoryDataRef.current);
 
-    console.log("result", res)
+    console.log("result", res);
     if (!res.success) {
       toast("Please find a street view location", {
         cancel: { label: "close" },
@@ -283,8 +277,8 @@ export default function CreateForm() {
           </div>
         </FormItem>
         <div className="">
-        <div id="map" className="h-[400px] w-full"></div>
-      </div>
+          <div id="map" className="h-[400px] w-full"></div>
+        </div>
         <Button>Submit</Button>
       </form>
     </Form>
