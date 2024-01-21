@@ -18,6 +18,11 @@ import { Textarea } from "~/components/ui/textarea";
 import { createSchema } from "~/types";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const Map = dynamic(() => import("./Map").then((r) => r.default), {
+  ssr: false,
+});
 
 export default function CreateForm() {
   const form = useForm<z.infer<typeof createSchema>>({
@@ -43,7 +48,7 @@ export default function CreateForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mx-auto flex max-w-md flex-col gap-4 rounded-lg border-2 border-border p-4"
+        className="mx-auto flex max-w-3xl flex-col gap-4 rounded-lg border-2 border-border p-4"
       >
         <h1 className="text-4xl">Create a memory</h1>
         <p>Capture a moment in google maps.</p>
@@ -87,7 +92,7 @@ export default function CreateForm() {
                   {...field}
                 />
               </FormControl>
-              <FormDescription></FormDescription>
+              <Map />
               <FormMessage />
             </FormItem>
           )}

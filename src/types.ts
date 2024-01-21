@@ -10,4 +10,9 @@ export const createSchema = z.object({
   streetViewUrl: z.string().url({
     message: "Street view url must be a valid url.",
   }),
+  long: z.number(),
+  lat: z.number(),
+  pitch: z.number(),
+  fov: z.number(),
+  zoom: z.number(),
 });
