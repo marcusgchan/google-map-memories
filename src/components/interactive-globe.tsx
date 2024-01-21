@@ -47,8 +47,11 @@ export const InteractiveGlobe = () => {
   useEffect(() => {
     if (globeEl.current) {
       globeEl.current.pointOfView({
-        altitude: 1.75,
+        altitude: 1.7,
       });
+      const controls = globeEl.current.controls();
+      controls.enableZoom = false;
+      controls.update();
     }
   }, [globeEl]);
 
