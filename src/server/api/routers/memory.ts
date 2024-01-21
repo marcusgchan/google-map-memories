@@ -90,7 +90,6 @@ export const memoryRouter = createTRPCRouter({
         .set({
           title: input.title,
           description: input.description,
-
         })
         .where(
           and(
