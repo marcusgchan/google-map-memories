@@ -28,7 +28,7 @@ export default function Map() {
         <div id="map" className="h-[400px] w-full"></div>
         <button
           onClick={() => {
-            console.log(mapRef?.current?.getCenter()?.lat());
+            console.log(mapRef?.current?.getCenter());
             console.log(mapRef?.current?.getStreetView());
           }}
         >
