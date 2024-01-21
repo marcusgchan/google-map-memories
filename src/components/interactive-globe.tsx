@@ -1,25 +1,15 @@
 "use client";
 import Globe from "react-globe.gl";
-import { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useRef } from "react";
 import GlowOrb from "/public/glow.png";
 import { api } from "~/trpc/react";
 
 export const InteractiveGlobe = () => {
-  const markerSvg = `<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M7.5 14.0426C11.1134 14.0426 14.0426 11.1134 14.0426 7.5C14.0426 3.88665 11.1134 0.957447 7.5 0.957447C3.88665 0.957447 0.957447 3.88665 0.957447 7.5C0.957447 11.1134 3.88665 14.0426 7.5 14.0426ZM7.5 15C11.6421 15 15 11.6421 15 7.5C15 3.35786 11.6421 0 7.5 0C3.35786 0 0 3.35786 0 7.5C0 11.6421 3.35786 15 7.5 15Z" fill="#398AE9"/>
-  <path d="M11.8085 7.5C11.8085 9.87952 9.87952 11.8085 7.5 11.8085C5.12048 11.8085 3.19149 9.87952 3.19149 7.5C3.19149 5.12048 5.12048 3.19149 7.5 3.19149C9.87952 3.19149 11.8085 5.12048 11.8085 7.5Z" fill="#398AE9"/>
+  const markerSvg = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 18.7234C14.8178 18.7234 18.7234 14.8178 18.7234 10C18.7234 5.1822 14.8178 1.2766 10 1.2766C5.1822 1.2766 1.2766 5.1822 1.2766 10C1.2766 14.8178 5.1822 18.7234 10 18.7234ZM10 20C15.5228 20 20 15.5228 20 10C20 4.47715 15.5228 0 10 0C4.47715 0 0 4.47715 0 10C0 15.5228 4.47715 20 10 20Z" fill="#398AE9"/>
+  <path d="M15.7447 10C15.7447 13.1727 13.1727 15.7447 10 15.7447C6.8273 15.7447 4.25532 13.1727 4.25532 10C4.25532 6.8273 6.8273 4.25532 10 4.25532C13.1727 4.25532 15.7447 6.8273 15.7447 10Z" fill="#398AE9"/>
   </svg>   
   `;
-
-  // Gen random data
-  // const N = 30;
-  // const gData = [...Array(N).keys()].map(() => ({
-  //   lat: (Math.random() - 0.5) * 180,
-  //   lng: (Math.random() - 0.5) * 360,
-  //   size: 7 + Math.random() * 30,
-  //   color: "#398AE9",
-  // }));
-  // console.log(gData);
 
   const globeEl = useRef();
   const {
@@ -28,13 +18,18 @@ export const InteractiveGlobe = () => {
     isLoading,
   } = api.memory.publicGetAll.useQuery();
 
-  const gData = memories.map((lat) => ({
-    lat: lat.lat,
-    lng: lat.long,
+  const gData = memories.map(({ id, title, date, lat, long }) => ({
+    id,
+    title,
+    date,
+    lat,
+    lng: long,
     size: 7 + Math.random() * 30,
     color: "#398AE9",
   }));
-  console.log(gData);
+
+  const onClickMemoryMarker = (memoryId: number) =>
+    router.push(`/memory/${memoryId}`);
 
   const [countries, setCountries] = useState({ features: [] });
   useEffect(() => {
@@ -169,20 +164,16 @@ export const InteractiveGlobe = () => {
         hexPolygonColor={() => "#ffffff"}
         htmlElementsData={gData}
         htmlElement={(d) => {
-          const el = document.createElement("div");
+          const el = document.createElement("a");
+          el.style.display = "flex";
           el.innerHTML = markerSvg;
           el.style.color = d.color;
           el.style.width = `${d.size}px`;
 
           el.style["pointer-events"] = "auto";
           el.style.cursor = "pointer";
+          el.href = `/memories/${d.id}`;
 
-          const hoverEl = document.createElement("div");
-          hoverEl.textContent = "hello";
-
-          el.onclick = () => console.info(d);
-          el.onmouseenter = () => el.appendChild(hoverEl);
-          el.onmouseleave = () => el.removeChild(hoverEl);
           return el;
         }}
       />
