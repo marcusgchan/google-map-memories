@@ -107,8 +107,45 @@ export default function CreateForm() {
     );
   };
 
-  const onSearchClicked = () => {
+  const onSearchClicked = async () => {
+    const center = { lat: 50.064192, lng: -130.605469 };
 
+    const { Map } = (await google.maps.importLibrary(
+      "maps",
+    )) as google.maps.MapsLibrary;
+
+    mapRef.current = new Map(
+      document.getElementById("map") as HTMLElement,
+      {
+        center: center,
+        zoom: 8,
+      },
+    );
+    
+    const placesService = new google.maps.places.PlacesService(mapRef.current);
+    
+    const request = {
+      query: inputRef.current?.value
+    };
+    
+    placesService.textSearch(request, (results, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        const location = results?.[0]?.geometry?.location
+
+        const lat = location?.lat()
+        const lng = location?.lng()
+
+        mapRef.current = new Map(
+          document.getElementById("map") as HTMLElement,
+          {
+            center: { lat: lat || center.lat, lng: lng || center.lng },
+            zoom: 8,
+          },
+        );
+      } else {
+        console.error('Error in textSearch:', status);
+      }
+    });
   }
 
   const mapMemoryDataRef = useRef<MapMemoryData>({
