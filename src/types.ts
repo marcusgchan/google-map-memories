@@ -7,9 +7,7 @@ export const createSchema = z.object({
   description: z.string().min(1, {
     message: "Description must be at least 1 characters.",
   }),
-  streetViewUrl: z.string().url({
-    message: "Street view url must be a valid url.",
-  }),
+  heading: z.number(),
   long: z.number(),
   lat: z.number(),
   pitch: z.number(),
