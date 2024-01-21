@@ -1,11 +1,20 @@
 import { useEffect, useRef } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
-import { MapMemoryData } from "./createForm";
+import {
+  MapMemoryData,
+  MapMemoryPosition,
+  MapMemoryPov,
+  MapMemoryZoom,
+} from "./createForm";
 
 export default function Map({
-  updateMemoryData,
+  updateMemoryPov,
+  updateMemoryZoom,
+  updateMemoryPosition,
 }: {
-  updateMemoryData: (data: MapMemoryData) => void;
+  updateMemoryPov: (data: MapMemoryPov) => void;
+  updateMemoryZoom: (data: MapMemoryZoom) => void;
+  updateMemoryPosition: (data: MapMemoryPosition) => void;
 }) {
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -35,15 +44,26 @@ export default function Map({
         mapRef.current.getStreetView().setVisible(true);
         mapRef.current.getStreetView().setVisible(false);
 
-        mapRef.current.addListener("bounds_changed", () => {
-          updateMemoryData({
+        mapRef.current.getStreetView().addListener("position_changed", () => {
+          console.log("position_changed");
+          updateMemoryPosition({
             long: mapRef.current?.getCenter()?.lng(),
             lat: mapRef.current?.getCenter()?.lat(),
+          });
+        });
+        mapRef.current.getStreetView().addListener("zoom_changed", () => {
+          // console.log("zoom_changed");
+          updateMemoryZoom({
             zoom: mapRef.current?.getStreetView().getZoom(),
-            pitch: mapRef.current?.getStreetView().getPov().pitch,
-            heading: mapRef.current?.getStreetView().getPov().heading,
             fov:
               180 / Math.pow(2, mapRef.current?.getStreetView().getZoom() ?? 1),
+          });
+        });
+        mapRef.current.getStreetView().addListener("pov_changed", () => {
+          // console.log("pov_changed");
+          updateMemoryPov({
+            pitch: mapRef.current?.getStreetView().getPov().pitch,
+            heading: mapRef.current?.getStreetView().getPov().heading,
           });
         });
       });
