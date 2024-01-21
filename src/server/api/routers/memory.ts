@@ -9,6 +9,7 @@ import { memories } from "~/server/db/schema";
 import { createSchema } from "~/types";
 
 const editSchema = z.object({
+  id: z.number(),
   title: z.string().min(1, {
     message: "Title must be at least 1 characters.",
   }),

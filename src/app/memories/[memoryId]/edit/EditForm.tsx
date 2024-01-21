@@ -17,14 +17,11 @@ import {
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { RouterOutputs } from "~/trpc/shared";
-
-const Map = dynamic(() => import("./Map").then((r) => r.default), {
-  ssr: false,
-});
+import { Loader } from "@googlemaps/js-api-loader";
+import { env } from "~/env";
+import { type RouterOutputs } from "~/trpc/shared";
 
 const mapMemorySchema = z.object({
   position: z.object({
@@ -41,7 +38,7 @@ const mapMemorySchema = z.object({
   }),
 });
 
-const editFormSchema = z.object({
+const createFormSchema = z.object({
   title: z.string().min(1, {
     message: "Title must be at least 1 characters.",
   }),
@@ -72,6 +69,119 @@ export function EditForm({
 }: {
   memory: NonNullable<RouterOutputs["memory"]["getById"]>;
 }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const center = { lat: 50.064192, lng: -130.605469 };
+  useEffect(() => {
+    const loader = new Loader({
+      apiKey: env.NEXT_PUBLIC_GOOGLE_MAPS_KEY,
+      version: "weekly",
+      libraries: ["places"],
+      // ...additionalOptions,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    loader.load().then(async () => {
+      const { Map } = (await google.maps.importLibrary(
+        "maps",
+      )) as google.maps.MapsLibrary;
+      mapRef.current = new Map(document.getElementById("map") as HTMLElement, {
+        center: center,
+        zoom: 8,
+      });
+
+      mapRef.current.getStreetView().setVisible(true);
+      mapRef.current.getStreetView().setPov({
+        heading: memory.heading,
+        pitch: memory.pitch,
+      });
+      mapRef.current.getStreetView().setPosition({
+        lat: memory.lat,
+        lng: memory.long,
+      });
+      mapRef.current.getStreetView().setZoom(memory.zoom);
+
+      mapRef.current.getStreetView().addListener("position_changed", () => {
+        console.log("position_changed");
+        updateMemoryPosition({
+          long: mapRef.current?.getStreetView().getLocation()?.latLng?.lng(),
+          lat: mapRef.current?.getStreetView()?.getLocation()?.latLng?.lat(),
+        });
+      });
+
+      mapRef.current.getStreetView().addListener("zoom_changed", () => {
+        // console.log("zoom_changed");
+        updateMemoryZoom({
+          zoom: mapRef.current?.getStreetView().getZoom(),
+          fov:
+            180 / Math.pow(2, mapRef.current?.getStreetView().getZoom() ?? 1),
+        });
+      });
+      mapRef.current.getStreetView().addListener("pov_changed", () => {
+        // console.log("pov_changed");
+        updateMemoryPov({
+          pitch: mapRef.current?.getStreetView().getPov().pitch,
+          heading: mapRef.current?.getStreetView().getPov().heading,
+        });
+      });
+    });
+  }, [memory]);
+
+  const onSearchChange = () => {
+    // Create a bounding box with sides ~10km away from the center point
+    const defaultBounds = {
+      north: center.lat + 0.1,
+      south: center.lat - 0.1,
+      east: center.lng + 0.1,
+      west: center.lng - 0.1,
+    };
+
+    const options = {
+      bounds: defaultBounds,
+      fields: ["address_components", "geometry", "icon", "name"],
+      strictBounds: false,
+    };
+
+    const autocomplete = new google.maps.places.Autocomplete(
+      inputRef.current,
+      options,
+    );
+  };
+
+  const onSearchClicked = async () => {
+    if (!mapRef.current) {
+      return;
+    }
+    // const { Map } = (await google.maps.importLibrary(
+    //   "maps",
+    // )) as google.maps.MapsLibrary;
+
+    const placesService = new google.maps.places.PlacesService(mapRef.current);
+
+    const request = {
+      query: inputRef.current?.value,
+    };
+
+    placesService.textSearch(request, (results, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        const location = results?.[0]?.geometry?.location;
+
+        const lat = location?.lat();
+        const lng = location?.lng();
+
+        if (!mapRef.current) {
+          return;
+        }
+
+        mapRef.current.setCenter(
+          new google.maps.LatLng(lat || center.lat, lng || center.lng),
+        );
+      } else {
+        console.error("Error in textSearch:", status);
+      }
+    });
+  };
+
   const mapMemoryDataRef = useRef<MapMemoryData>({
     position: undefined,
     pov: undefined,
@@ -95,36 +205,41 @@ export function EditForm({
     }
     mapMemoryDataRef.current.pov = data;
   };
-  const form = useForm<z.infer<typeof editFormSchema>>({
-    resolver: zodResolver(editFormSchema),
+  const form = useForm<z.infer<typeof createFormSchema>>({
+    resolver: zodResolver(createFormSchema),
     defaultValues: {
-      title: memory?.title ?? "",
-      description: memory?.description ?? "",
+      title: memory.title,
+      description: memory.description,
     },
   });
   const router = useRouter();
-  const mutation = api.memory.create.useMutation({
+  const mutation = api.memory.edit.useMutation({
     onSuccess({ id }) {
       router.push(`/memories/${id}`);
     },
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof editFormSchema>) {
+  function onSubmit(values: z.infer<typeof createFormSchema>) {
     const res = mapMemorySchema.safeParse(mapMemoryDataRef.current);
+
+    console.log("result", res);
     if (!res.success) {
-      toast("Please find a steet view location", {
+      toast("Please find a street view location", {
         cancel: { label: "close" },
       });
       return;
     }
+
     mutation.mutate({
+      id: memory.id,
       ...values,
       ...res.data.position,
       ...res.data.pov,
       ...res.data.zoom,
     });
   }
+
   return (
     <Form {...form}>
       <form
@@ -161,12 +276,22 @@ export function EditForm({
             </FormItem>
           )}
         />
-        <Map
-          memory={memory}
-          updateMemoryPosition={updateMemoryPosition}
-          updateMemoryPov={updateMemoryPov}
-          updateMemoryZoom={updateMemoryZoom}
-        />
+        <FormItem>
+          <FormLabel>Place</FormLabel>
+          <div className="flex space-x-2">
+            <Input
+              ref={inputRef}
+              onChange={onSearchChange}
+              placeholder="Insert place to help specify the location"
+            />
+            <Button onClick={onSearchClicked} type="button">
+              Search
+            </Button>
+          </div>
+        </FormItem>
+        <div className="">
+          <div id="map" className="h-[400px] w-full"></div>
+        </div>
         <Button>Submit</Button>
       </form>
     </Form>
