@@ -21,6 +21,7 @@ const editSchema = z.object({
   }),
 });
 
+
 export const memoryRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createSchema)
@@ -28,7 +29,11 @@ export const memoryRouter = createTRPCRouter({
       const res = await ctx.db.insert(memories).values({
         title: input.title,
         description: input.description,
-        streetViewUrl: input.streetViewUrl,
+        lat: input.lat,
+        long: input.long,
+        fov: input.fov,
+        heading: input.heading,
+        pitch: input.pitch,
         createdById: ctx.session.user.id,
       });
       return { id: res.insertId };
@@ -52,7 +57,8 @@ export const memoryRouter = createTRPCRouter({
         title: memories.title,
         description: memories.description,
         date: memories.createdAt,
-        streetViewUrl: memories.streetViewUrl,
+        lat: memories.lat,
+        long: memories.long,
       })
       .from(memories)
       .orderBy(desc(memories.createdAt));
@@ -65,8 +71,12 @@ export const memoryRouter = createTRPCRouter({
           id: memories.id,
           title: memories.title,
           description: memories.description,
+          lat: memories.lat,
+          long: memories.long,
+          fov: memories.fov,
+          heading: memories.heading,
+          pitch: memories.pitch,
           date: memories.createdAt,
-          streetViewUrl: memories.streetViewUrl,
         })
         .from(memories)
         .where(eq(memories.id, input.id));
@@ -80,7 +90,7 @@ export const memoryRouter = createTRPCRouter({
         .set({
           title: input.title,
           description: input.description,
-          streetViewUrl: input.streetViewUrl,
+
         })
         .where(
           and(

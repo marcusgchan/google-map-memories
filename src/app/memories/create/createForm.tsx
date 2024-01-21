@@ -15,22 +15,53 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Textarea } from "~/components/ui/textarea";
-import { createSchema } from "~/types";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { useRef } from "react";
+import { toast } from "sonner";
 
 const Map = dynamic(() => import("./Map").then((r) => r.default), {
   ssr: false,
 });
 
+const mapMemorySchema = z.object({
+  long: z.number(),
+  lat: z.number(),
+  pitch: z.number(),
+  fov: z.number(),
+  heading: z.number(),
+  zoom: z.number(),
+});
+
+const createFormSchema = z.object({
+  title: z.string().min(1, {
+    message: "Title must be at least 1 characters.",
+  }),
+  description: z.string().min(1, {
+    message: "Description must be at least 1 characters.",
+  }),
+});
+
+export type MapMemoryData = {
+  long: number | undefined;
+  lat: number | undefined;
+  pitch: number | undefined;
+  heading: number | undefined;
+  fov: number | undefined;
+  zoom: number | undefined;
+};
+
 export default function CreateForm() {
-  const form = useForm<z.infer<typeof createSchema>>({
-    resolver: zodResolver(createSchema),
+  const mapMemoryDataRef = useRef<MapMemoryData>();
+  const updateMemoryData = (data: MapMemoryData) => {
+    mapMemoryDataRef.current = data;
+  };
+  const form = useForm<z.infer<typeof createFormSchema>>({
+    resolver: zodResolver(createFormSchema),
     defaultValues: {
       title: "",
       description: "",
-      streetViewUrl: "",
     },
   });
   const router = useRouter();
@@ -41,8 +72,16 @@ export default function CreateForm() {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof createSchema>) {
-    mutation.mutate(values);
+  function onSubmit(values: z.infer<typeof createFormSchema>) {
+    const res = mapMemorySchema.safeParse(mapMemoryDataRef.current);
+    if (!res.success) {
+      console.log(mapMemoryDataRef.current);
+      toast("Please find a steet view location", {
+        cancel: { label: "close" },
+      });
+      return;
+    }
+    mutation.mutate({ ...values, ...res.data });
   }
   return (
     <Form {...form}>
@@ -80,23 +119,7 @@ export default function CreateForm() {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="streetViewUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Street View URL</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Copy and past the street view URL"
-                  {...field}
-                />
-              </FormControl>
-              <Map />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <Map updateMemoryData={updateMemoryData} />
         <Button>Submit</Button>
       </form>
     </Form>

@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   bigint,
+  double,
   index,
   int,
   mysqlTableCreator,
@@ -25,7 +26,11 @@ export const memories = mysqlTable(
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
     title: varchar("title", { length: 256 }).notNull(),
     description: varchar("description", { length: 1000 }).notNull(),
-    streetViewUrl: varchar("streetViewUrl", { length: 1000 }).notNull(),
+    long: double("long").notNull(),
+    lat: double("lat").notNull(),
+    fov: double("fov").notNull(),
+    heading: double("heading").notNull(),
+    pitch: double("pitch").notNull(),
     createdById: varchar("createdById", { length: 255 }).notNull(),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
