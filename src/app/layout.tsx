@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import { Inter } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import Head from "next/head";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,6 +23,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" style={{ colorScheme: "dark" }} className="dark">
+      <Head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
+          rel="stylesheet"
+        />
+      </Head>
       <body className={`p-4 font-sans ${inter.variable}`}>
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
