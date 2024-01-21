@@ -44,15 +44,10 @@ export default function Map({
         if (!mapRef.current) throw Error("Cant get map reference");
         mapRef.current.getStreetView().setVisible(true);
         mapRef.current.getStreetView().setVisible(false);
-<<<<<<< HEAD
-        mapRef.current.addListener("bounds_changed", () => {
-          updateMemoryData({
-=======
 
         mapRef.current.getStreetView().addListener("position_changed", () => {
           // console.log("position_changed");
           updateMemoryPosition({
->>>>>>> 4d999d28a917ab5440959ecf1423812da9cb649b
             long: mapRef.current?.getCenter()?.lng(),
             lat: mapRef.current?.getCenter()?.lat(),
           });
