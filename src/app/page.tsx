@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Anchor } from "~/components/ui/anchor";
-import { InteractiveGlobe } from "~/components/interactive-globe";
+import { InteractiveGlobe } from "~/components/interactive-globe.jsx";
 import { getServerAuthSession } from "~/server/auth";
 
 export default async function Home() {

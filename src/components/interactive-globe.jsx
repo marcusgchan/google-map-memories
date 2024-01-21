@@ -28,9 +28,6 @@ export const InteractiveGlobe = () => {
     color: "#398AE9",
   }));
 
-  const onClickMemoryMarker = (memoryId: number) =>
-    router.push(`/memory/${memoryId}`);
-
   const [countries, setCountries] = useState({ features: [] });
   useEffect(() => {
     // load data
