@@ -18,9 +18,10 @@ import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Loader } from "@googlemaps/js-api-loader";
+import { env } from "~/env";
 
 const Map = dynamic(() => import("./Map").then((r) => r.default), {
   ssr: false,
@@ -68,47 +69,46 @@ export type MapMemoryData = {
 };
 
 export default function CreateForm() {
-  const [searchValue, setSearchValue] = useState("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
 
-  const loader = new Loader({
-    apiKey: "AIzaSyALnd9Vz1KNL9vGgRYnlL_lyB9yQRqyzVI", // Replace with your API key
-    version: "weekly",
+  useEffect(() => {
+    const loader = new Loader({
+      apiKey: env.NEXT_PUBLIC_GOOGLE_MAPS_KEY,
+      version: "weekly",
+      libraries: ["places"],
+      // ...additionalOptions,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    loader.load().then(async () => {});
   });
 
   const onSearchClicked = () => {
     // Use the searchValue as needed
-    console.log("Search value:", searchValue);
 
-    const placesApiUrl = (place: string) =>
-      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${place}&key=AIzaSyALnd9Vz1KNL9vGgRYnlL_lyB9yQRqyzVI`;
+    const center = { lat: 50.064192, lng: -130.605469 };
+    // Create a bounding box with sides ~10km away from the center point
+    const defaultBounds = {
+      north: center.lat + 0.1,
+      south: center.lat - 0.1,
+      east: center.lng + 0.1,
+      west: center.lng - 0.1,
+    };
+    // const placesApiUrl = (place: string) =>
+    //   `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${place}&key=AIzaSyALnd9Vz1KNL9vGgRYnlL_lyB9yQRqyzVI`;
 
-    fetch(placesApiUrl(searchValue), {
-      method: "GET",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-      }    
-    }).then((response) => response.json())
-      .then((data) => {
-        const results = data.results;
-        const status = data.status;
+    const options = {
+      bounds: defaultBounds,
+      componentRestrictions: { country: "us" },
+      fields: ["address_components", "geometry", "icon", "name"],
+      strictBounds: false,
+    };
 
-        if (status !== "OK" || !results) {
-          console.error(`Error fetching places for ${searchValue}`);
-          return;
-        }
-
-        if (results.length === 0) {
-          console.error(`No places found based on searchValue: ${searchValue}`);
-          return;
-        }
-
-        // Handle the results
-        console.log("Results:", results);
-      })
-      .catch((error) => {
-        console.error("Error fetching places:", error);
-      });
+    const autocomplete = new google.maps.places.Autocomplete(
+      inputRef.current,
+      options,
+    );
+    console.log(autocomplete.getPlace());
   };
 
   const mapMemoryDataRef = useRef<MapMemoryData>({
@@ -200,16 +200,16 @@ export default function CreateForm() {
             </FormItem>
           )}
         />
-
         <FormItem>
           <FormLabel>Place</FormLabel>
           <div className="flex space-x-2">
             <Input
+              ref={inputRef}
               placeholder="Insert place to help specify the location"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
             />
-            <Button onClick={onSearchClicked}>Search</Button>
+            <Button onClick={onSearchClicked} type="button">
+              Search
+            </Button>
           </div>
         </FormItem>
         <Map

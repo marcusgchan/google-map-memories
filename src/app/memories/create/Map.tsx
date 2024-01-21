@@ -23,6 +23,7 @@ export default function Map({
     const loader = new Loader({
       apiKey: env.NEXT_PUBLIC_GOOGLE_MAPS_KEY,
       version: "weekly",
+      libraries: ["places"],
       // ...additionalOptions,
     });
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
