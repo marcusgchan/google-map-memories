@@ -1,6 +1,6 @@
 "use client";
 import Globe from "react-globe.gl";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import GlowOrb from "/public/glow.png";
 import { api } from "~/trpc/react";
 
@@ -12,21 +12,27 @@ export const InteractiveGlobe = () => {
   `;
 
   // Gen random data
-  const N = 30;
-  const gData = [...Array(N).keys()].map(() => ({
-    lat: (Math.random() - 0.5) * 180,
-    lng: (Math.random() - 0.5) * 360,
-    size: 7 + Math.random() * 30,
-    color: "#398AE9",
-  }));
+  // const N = 30;
+  // const gData = [...Array(N).keys()].map(() => ({
+  //   lat: (Math.random() - 0.5) * 180,
+  //   lng: (Math.random() - 0.5) * 360,
+  //   size: 7 + Math.random() * 30,
+  //   color: "#398AE9",
+  // }));
 
   const globeEl = useRef();
   const {
-    data: memories,
+    data: memories = [],
     isError,
     isLoading,
   } = api.memory.publicGetAll.useQuery();
-  console.log(memories);
+
+  const gData = memories.map((lat, long) => ({
+    lat,
+    long,
+    size: 7 + Math.random() * 30,
+    color: "#398AE9",
+  }));
 
   const [countries, setCountries] = useState({ features: [] });
   useEffect(() => {
@@ -51,6 +57,8 @@ export const InteractiveGlobe = () => {
       });
       const controls = globeEl.current.controls();
       controls.enableZoom = false;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.25;
       controls.update();
     }
   }, [globeEl]);
@@ -166,7 +174,13 @@ export const InteractiveGlobe = () => {
 
           el.style["pointer-events"] = "auto";
           el.style.cursor = "pointer";
+
+          const hoverEl = document.createElement("div");
+          hoverEl.textContent = "hello";
+
           el.onclick = () => console.info(d);
+          el.onmouseenter = () => el.appendChild(hoverEl);
+          el.onmouseleave = () => el.removeChild(hoverEl);
           return el;
         }}
       />
@@ -174,7 +188,7 @@ export const InteractiveGlobe = () => {
         <img
           src={GlowOrb.src}
           alt="glow orb"
-          className=" pointer-events-none absolute inset-0 ml-[23.5%] mr-auto mt-[15%] w-[55%]"
+          className=" pointer-events-none absolute inset-0 ml-[23.5%] mr-auto mt-[16%] w-[55%]"
         />
       </div>
     </article>
