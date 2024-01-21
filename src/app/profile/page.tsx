@@ -2,7 +2,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Header } from "~/components/header";
-import { Button } from "~/components/ui/button";
+import { Anchor } from "~/components/ui/anchor";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -35,7 +35,7 @@ export default async function Profile() {
                       {memory.date.toLocaleDateString()}
                     </p>
                   </Link>
-                  <Button>Edit</Button>
+                  <Anchor href={`/memories/${memory.id}/edit`}>Edit</Anchor>
                 </li>
               ))
             ) : (

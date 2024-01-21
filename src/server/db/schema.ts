@@ -23,9 +23,9 @@ export const memories = mysqlTable(
   "memories",
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-    title: varchar("title", { length: 256 }),
-    description: varchar("description", { length: 1000 }),
-    streetViewUrl: varchar("streetViewUrl", { length: 1000 }),
+    title: varchar("title", { length: 256 }).notNull(),
+    description: varchar("description", { length: 1000 }).notNull(),
+    streetViewUrl: varchar("streetViewUrl", { length: 1000 }).notNull(),
     createdById: varchar("createdById", { length: 255 }).notNull(),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
