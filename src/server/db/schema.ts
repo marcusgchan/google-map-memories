@@ -30,6 +30,7 @@ export const memories = mysqlTable(
     lat: double("lat").notNull(),
     fov: double("fov").notNull(),
     heading: double("heading").notNull(),
+    zoom: double("zoom").notNull(),
     pitch: double("pitch").notNull(),
     createdById: varchar("createdById", { length: 255 }).notNull(),
     createdAt: timestamp("created_at")

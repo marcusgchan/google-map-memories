@@ -9,16 +9,18 @@ import { memories } from "~/server/db/schema";
 import { createSchema } from "~/types";
 
 const editSchema = z.object({
-  id: z.number(),
   title: z.string().min(1, {
     message: "Title must be at least 1 characters.",
   }),
   description: z.string().min(1, {
     message: "Description must be at least 1 characters.",
   }),
-  streetViewUrl: z.string().url({
-    message: "Street view url must be a valid url.",
-  }),
+  lat: z.number(),
+  long: z.number(),
+  fov: z.number(),
+  heading: z.number(),
+  pitch: z.number(),
+  zoom: z.number(),
 });
 
 
@@ -34,6 +36,7 @@ export const memoryRouter = createTRPCRouter({
         fov: input.fov,
         heading: input.heading,
         pitch: input.pitch,
+        zoom: input.zoom,
         createdById: ctx.session.user.id,
       });
       return { id: res.insertId };
@@ -77,6 +80,7 @@ export const memoryRouter = createTRPCRouter({
           heading: memories.heading,
           pitch: memories.pitch,
           date: memories.createdAt,
+          zoom: memories.zoom,
         })
         .from(memories)
         .where(eq(memories.id, input.id));
@@ -90,6 +94,12 @@ export const memoryRouter = createTRPCRouter({
         .set({
           title: input.title,
           description: input.description,
+          lat: input.lat,
+          long: input.long,
+          fov: input.fov,
+          heading: input.heading,
+          pitch: input.pitch,
+          zoom: input.zoom,
         })
         .where(
           and(

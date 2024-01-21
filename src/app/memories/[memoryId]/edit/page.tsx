@@ -2,7 +2,7 @@ import { Header } from "~/components/header";
 import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import { getServerAuthSession } from "~/server/auth";
-import { EditMemory } from "./EditMemory";
+import { EditForm } from "./EditForm";
 import { api } from "~/trpc/server";
 
 export default async function Edit({
@@ -25,7 +25,7 @@ export default async function Edit({
     <>
       <Header />
       <main>
-        {memory && <EditMemory memory={memory} />}
+        {memory && <EditForm memory={memory} />}
         {!memory && <p>Memory not found</p>}
       </main>
     </>

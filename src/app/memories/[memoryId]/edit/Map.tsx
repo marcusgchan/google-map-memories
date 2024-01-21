@@ -7,8 +7,10 @@ import {
   MapMemoryZoom,
 } from "./createForm";
 import { env } from "~/env";
+import { RouterOutputs } from "~/trpc/shared";
 
 export default function Map({
+  memory,
   updateMemoryPov,
   updateMemoryZoom,
   updateMemoryPosition,
@@ -16,6 +18,7 @@ export default function Map({
   updateMemoryPov: (data: MapMemoryPov) => void;
   updateMemoryZoom: (data: MapMemoryZoom) => void;
   updateMemoryPosition: (data: MapMemoryPosition) => void;
+  memory: NonNullable<RouterOutputs["memory"]["getById"]>;
 }) {
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -43,18 +46,20 @@ export default function Map({
       .then(() => {
         if (!mapRef.current) throw Error("Cant get map reference");
         mapRef.current.getStreetView().setVisible(true);
-        mapRef.current.getStreetView().setVisible(false);
-<<<<<<< HEAD
-        mapRef.current.addListener("bounds_changed", () => {
-          updateMemoryData({
-=======
+        mapRef.current
+          .getStreetView()
+          .setPov({ heading: memory.heading, pitch: memory.pitch });
+        mapRef.current.getStreetView().setPosition({
+          lat: memory.lat,
+          lng: memory.long,
+        });
+        mapRef.current.getStreetView().setZoom(memory.zoom);
 
         mapRef.current.getStreetView().addListener("position_changed", () => {
           // console.log("position_changed");
           updateMemoryPosition({
->>>>>>> 4d999d28a917ab5440959ecf1423812da9cb649b
-            long: mapRef.current?.getCenter()?.lng(),
-            lat: mapRef.current?.getCenter()?.lat(),
+            long: mapRef.current?.getStreetView().getLocation()?.latLng?.lng(),
+            lat: mapRef.current?.getStreetView().getLocation()?.latLng?.lat(),
           });
         });
         mapRef.current.getStreetView().addListener("zoom_changed", () => {
