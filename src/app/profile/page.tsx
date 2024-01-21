@@ -9,12 +9,12 @@ import { api } from "~/trpc/server";
 export default async function Profile() {
   noStore();
 
-  const memories = await api.memory.getAll.query();
-
   const session = await getServerAuthSession();
   if (!session) {
     redirect("/api/auth/signin");
   }
+
+  const memories = await api.memory.getAll.query();
 
   return (
     <>

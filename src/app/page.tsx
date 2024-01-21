@@ -8,8 +8,8 @@ export default async function Home() {
       <header className="mb-4 flex justify-between">
         <span>Google Maps Memories</span>
         <span className="flex items-center gap-4">
-          <Link href="/profile">profile</Link>
           <Anchor href="/memories/create">Submit A Memory</Anchor>
+          <Link href="/profile">Profile</Link>
         </span>
       </header>
       <main className="">
