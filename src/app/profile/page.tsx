@@ -18,7 +18,7 @@ export default async function Profile() {
 
   return (
     <>
-      <Header />
+      <Header />    
       <main>
         <div className="mx-auto max-w-md rounded-md border-2 border-border p-4">
           <h1 className="text-xl">{session.user.email}</h1>

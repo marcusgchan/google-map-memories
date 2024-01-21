@@ -8,11 +8,11 @@ import Link from "next/link";
 export function Header() {
   const router = useRouter();
   return (
-    <header className="flex justify-between">
-      <Button onClick={() => router.back()}>Back</Button>
+    <header className="my-4 mx-8 flex justify-between">
+      <span className="cursor-pointer" onClick={() => router.back()}>&#8592; Back</span>
       <span className="flex items-center gap-4">
-        <Link href="/profile">profile</Link>
-        <Anchor href="/api/auth/signout">Logout</Anchor>
+        <Anchor href="/api/auth/signout">Log out</Anchor>
+        <Link href="/profile">Profile</Link>
       </span>
     </header>
   );
