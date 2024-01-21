@@ -36,6 +36,24 @@ export default async function Memory({
   streeViewURL.searchParams.append("pitch", memory.pitch.toString());
   streeViewURL.searchParams.append("heading", memory.heading.toString());
 
+  function formatDate(inputDate: string | Date) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr',
+      'May', 'Jun', 'Jul', 'Aug',
+      'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+  
+    const date = new Date(inputDate);
+    const month = months[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+  
+    const formattedDate = `${month} ${day}, ${year}`;
+    return formattedDate;
+  }
+  const center = { lat: 50.064192, lng: -130.605469 };
+
+  
   return (
     <div className="relative mx-8 my-4 h-screen ">
       <img
@@ -49,7 +67,7 @@ export default async function Memory({
       <Card className="fixed bottom-16 left-16 h-64 w-5/12 overflow-auto border-none bg-black bg-opacity-85">
         <CardHeader className="m-1">
           <CardTitle className="text-2xl">{memory.title}</CardTitle>
-          <CardDescription>{memory.date.toLocaleDateString()}</CardDescription>
+          <CardDescription>{formatDate(memory.date)}</CardDescription>
         </CardHeader>
         <CardContent>{memory.description}</CardContent>
       </Card>
