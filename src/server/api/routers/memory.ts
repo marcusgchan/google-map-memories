@@ -24,6 +24,9 @@ const editSchema = z.object({
   zoom: z.number(),
 });
 
+const deleteSchema = z.object({
+  id: z.number(),
+});
 
 export const memoryRouter = createTRPCRouter({
   create: protectedProcedure
@@ -102,6 +105,19 @@ export const memoryRouter = createTRPCRouter({
           pitch: input.pitch,
           zoom: input.zoom,
         })
+        .where(
+          and(
+            eq(memories.id, input.id),
+            eq(memories.createdById, ctx.session.user.id),
+          ),
+        );
+      return { id: input.id };
+    }),
+  delete: protectedProcedure
+    .input(deleteSchema)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(memories)
         .where(
           and(
             eq(memories.id, input.id),

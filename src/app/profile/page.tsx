@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Header } from "~/components/header";
 import { Anchor } from "~/components/ui/anchor";
+import { DeleteButton } from "~/components/delete-button";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -18,7 +19,7 @@ export default async function Profile() {
 
   return (
     <>
-      <Header />    
+      <Header />
       <main>
         <div className="mx-auto max-w-md rounded-md border-2 border-border p-4">
           <h1 className="text-xl">{session.user.email}</h1>
@@ -36,6 +37,7 @@ export default async function Profile() {
                     </p>
                   </Link>
                   <Anchor href={`/memories/${memory.id}/edit`}>Edit</Anchor>
+                  <DeleteButton memoryId={memory.id} />
                 </li>
               ))
             ) : (
