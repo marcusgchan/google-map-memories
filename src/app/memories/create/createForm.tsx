@@ -71,6 +71,7 @@ export type MapMemoryData = {
 export default function CreateForm() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const center = { lat: 50.064192, lng: -130.605469 };
 
   useEffect(() => {
     const loader = new Loader({
@@ -80,13 +81,48 @@ export default function CreateForm() {
       // ...additionalOptions,
     });
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    loader.load().then(async () => {});
-  });
+    loader.load().then(async () => {
+      const { Map } = (await google.maps.importLibrary(
+        "maps",
+      )) as google.maps.MapsLibrary;
+      mapRef.current = new Map(
+        document.getElementById("map") as HTMLElement,
+        {
+          center: center,
+          zoom: 8,
+        },
+      );
+
+      mapRef.current.getStreetView().setVisible(true);
+      mapRef.current.getStreetView().setVisible(false);
+
+      mapRef.current.getStreetView().addListener("position_changed", () => {
+        // console.log("position_changed");
+        updateMemoryPosition({
+          long: mapRef.current?.getCenter()?.lng(),
+          lat: mapRef.current?.getCenter()?.lat(),
+        });
+      });
+      mapRef.current.getStreetView().addListener("zoom_changed", () => {
+        // console.log("zoom_changed");
+        updateMemoryZoom({
+          zoom: mapRef.current?.getStreetView().getZoom(),
+          fov:
+            180 / Math.pow(2, mapRef.current?.getStreetView().getZoom() ?? 1),
+        });
+      });
+      mapRef.current.getStreetView().addListener("pov_changed", () => {
+        // console.log("pov_changed");
+        updateMemoryPov({
+          pitch: mapRef.current?.getStreetView().getPov().pitch,
+          heading: mapRef.current?.getStreetView().getPov().heading,
+        });
+      });
+ 
+    });
+  }, []);
 
   const onSearchChange = () => {
-    // Use the searchValue as needed
-
-    const center = { lat: 50.064192, lng: -130.605469 };
     // Create a bounding box with sides ~10km away from the center point
     const defaultBounds = {
       north: center.lat + 0.1,
@@ -108,19 +144,13 @@ export default function CreateForm() {
   };
 
   const onSearchClicked = async () => {
-    const center = { lat: 50.064192, lng: -130.605469 };
 
-    const { Map } = (await google.maps.importLibrary(
-      "maps",
-    )) as google.maps.MapsLibrary;
-
-    mapRef.current = new Map(
-      document.getElementById("map") as HTMLElement,
-      {
-        center: center,
-        zoom: 8,
-      },
-    );
+    if (!mapRef.current) {
+      return;
+    }
+    // const { Map } = (await google.maps.importLibrary(
+    //   "maps",
+    // )) as google.maps.MapsLibrary;
     
     const placesService = new google.maps.places.PlacesService(mapRef.current);
     
@@ -135,13 +165,11 @@ export default function CreateForm() {
         const lat = location?.lat()
         const lng = location?.lng()
 
-        mapRef.current = new Map(
-          document.getElementById("map") as HTMLElement,
-          {
-            center: { lat: lat || center.lat, lng: lng || center.lng },
-            zoom: 8,
-          },
-        );
+        if (!mapRef.current) {
+          return;
+        }
+
+        mapRef.current.setCenter(new google.maps.LatLng(lat || center.lat, lng || center.lng))
       } else {
         console.error('Error in textSearch:', status);
       }
@@ -188,12 +216,15 @@ export default function CreateForm() {
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof createFormSchema>) {
     const res = mapMemorySchema.safeParse(mapMemoryDataRef.current);
+
+    console.log("result", res)
     if (!res.success) {
-      toast("Please find a steet view location", {
+      toast("Please find a street view location", {
         cancel: { label: "close" },
       });
       return;
     }
+
     mutation.mutate({
       ...values,
       ...res.data.position,
@@ -250,11 +281,9 @@ export default function CreateForm() {
             </Button>
           </div>
         </FormItem>
-        <Map
-          updateMemoryPosition={updateMemoryPosition}
-          updateMemoryPov={updateMemoryPov}
-          updateMemoryZoom={updateMemoryZoom}
-        />
+        <div className="">
+        <div id="map" className="h-[400px] w-full"></div>
+      </div>
         <Button>Submit</Button>
       </form>
     </Form>

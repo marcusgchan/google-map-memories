@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { MutableRefObject, useEffect, useRef } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import {
   MapMemoryData,
@@ -12,12 +12,13 @@ export default function Map({
   updateMemoryPov,
   updateMemoryZoom,
   updateMemoryPosition,
+  mapRef
 }: {
   updateMemoryPov: (data: MapMemoryPov) => void;
   updateMemoryZoom: (data: MapMemoryZoom) => void;
-  updateMemoryPosition: (data: MapMemoryPosition) => void;
+  updateMemoryPosition: (data: MapMemoryPosition) => void
+  mapRef: MutableRefObject<google.maps.Map | null>
 }) {
-  const mapRef = useRef<google.maps.Map | null>(null);
 
   useEffect(() => {
     const loader = new Loader({
@@ -29,18 +30,6 @@ export default function Map({
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     loader
       .load()
-      .then(async () => {
-        const { Map } = (await google.maps.importLibrary(
-          "maps",
-        )) as google.maps.MapsLibrary;
-        mapRef.current = new Map(
-          document.getElementById("map") as HTMLElement,
-          {
-            center: { lat: -34.397, lng: 150.644 },
-            zoom: 8,
-          },
-        );
-      })
       .then(() => {
         if (!mapRef.current) throw Error("Cant get map reference");
         mapRef.current.getStreetView().setVisible(true);
@@ -68,6 +57,7 @@ export default function Map({
             heading: mapRef.current?.getStreetView().getPov().heading,
           });
         });
+      
       });
   }, []);
 
