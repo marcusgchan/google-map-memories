@@ -19,6 +19,7 @@ export const InteractiveGlobe = () => {
   //   size: 7 + Math.random() * 30,
   //   color: "#398AE9",
   // }));
+  // console.log(gData);
 
   const globeEl = useRef();
   const {
@@ -27,12 +28,13 @@ export const InteractiveGlobe = () => {
     isLoading,
   } = api.memory.publicGetAll.useQuery();
 
-  const gData = memories.map((lat, long) => ({
-    lat,
-    long,
+  const gData = memories.map((lat) => ({
+    lat: lat.lat,
+    lng: lat.long,
     size: 7 + Math.random() * 30,
     color: "#398AE9",
   }));
+  console.log(gData);
 
   const [countries, setCountries] = useState({ features: [] });
   useEffect(() => {
