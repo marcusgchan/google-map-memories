@@ -83,7 +83,7 @@ export default function CreateForm() {
     loader.load().then(async () => {});
   });
 
-  const onSearchClicked = () => {
+  const onSearchChange = () => {
     // Use the searchValue as needed
 
     const center = { lat: 50.064192, lng: -130.605469 };
@@ -94,12 +94,9 @@ export default function CreateForm() {
       east: center.lng + 0.1,
       west: center.lng - 0.1,
     };
-    // const placesApiUrl = (place: string) =>
-    //   `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${place}&key=AIzaSyALnd9Vz1KNL9vGgRYnlL_lyB9yQRqyzVI`;
 
     const options = {
       bounds: defaultBounds,
-      componentRestrictions: { country: "us" },
       fields: ["address_components", "geometry", "icon", "name"],
       strictBounds: false,
     };
@@ -108,8 +105,11 @@ export default function CreateForm() {
       inputRef.current,
       options,
     );
-    console.log(autocomplete.getPlace());
   };
+
+  const onSearchClicked = () => {
+
+  }
 
   const mapMemoryDataRef = useRef<MapMemoryData>({
     position: undefined,
@@ -205,6 +205,7 @@ export default function CreateForm() {
           <div className="flex space-x-2">
             <Input
               ref={inputRef}
+              onChange={onSearchChange}
               placeholder="Insert place to help specify the location"
             />
             <Button onClick={onSearchClicked} type="button">
