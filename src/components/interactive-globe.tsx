@@ -3,6 +3,7 @@ import Globe from "react-globe.gl";
 import { useState, useEffect, useRef } from "react";
 import GlowOrb from "/public/glow.png";
 import { api } from "~/trpc/react";
+import { constants } from "buffer";
 
 const InteractiveGlobe = () => {
   const markerSvg = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10,6 +11,19 @@ const InteractiveGlobe = () => {
   <path d="M15.7447 10C15.7447 13.1727 13.1727 15.7447 10 15.7447C6.8273 15.7447 4.25532 13.1727 4.25532 10C4.25532 6.8273 6.8273 4.25532 10 4.25532C13.1727 4.25532 15.7447 6.8273 15.7447 10Z" fill="#398AE9"/>
   </svg>   
   `;
+
+  const [width, setWidth] = useState(window.innerWidth - 20);
+  useEffect(() => {
+    const handleResize = () => {
+      console.log("resize");
+      setWidth(window.innerWidth - 20);
+    };
+    console.log("useEffect");
+    window.addEventListener("resize", handleResize, true);
+    return () => {
+      window.removeEventListener("resize", handleResize, true);
+    };
+  }, [setWidth]);
 
   const globeEl = useRef();
   const {
@@ -57,9 +71,11 @@ const InteractiveGlobe = () => {
     }
   }, [globeEl]);
 
+  const containerRef = useRef(null);
+
   return (
-    <article>
-      <div className="absolute">
+    <article ref={containerRef} className="relative">
+      <div className="absolute inset-0 -z-10 max-w-full translate-x-[-5rem]">
         <svg
           width="1504"
           height="1226"
@@ -151,6 +167,7 @@ const InteractiveGlobe = () => {
       </div>
       <Globe
         ref={globeEl}
+        width={width}
         backgroundColor="rgba(0,0,0,0)"
         showAtmosphere={false}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
@@ -174,11 +191,12 @@ const InteractiveGlobe = () => {
           return el;
         }}
       />
-      <div className="flex h-full w-full items-center justify-center">
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <img
+          style={{ width: 730, minWidth: 730 }}
           src={GlowOrb.src}
           alt="glow orb"
-          className=" pointer-events-none absolute inset-0 ml-[23.5%] mr-auto mt-[16%] w-[55%]"
+          className=" pointer-events-none mb-4 ml-3 aspect-square"
         />
       </div>
     </article>

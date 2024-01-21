@@ -58,13 +58,13 @@ export default async function Memory({
     <div className="relative mx-8 my-4 h-screen ">
       <img
         src={streeViewURL.toString()}
-        className="fixed inset-0 -z-10 h-full w-full"
+        className="fixed inset-0 -z-10 h-full w-full object-cover"
       />
       <div className="fixed inset-0 h-full w-full bg-[linear-gradient(180deg,rgba(0,0,0,1)0%,rgba(0,0,0,0)39%,rgba(0,0,0,0)72%,rgba(0,0,0,1)100%)]"></div>
       <div className="fixed text-lg">
         <a href="../">&#8592; Back</a>
       </div>
-      <Card className="fixed bottom-16 left-16 h-64 w-5/12 overflow-auto border-none bg-black bg-opacity-85">
+      <Card className="bg-opacity-85 fixed bottom-16 left-16 h-64 w-5/12 overflow-auto border-none bg-black">
         <CardHeader className="m-1">
           <CardTitle className="text-2xl">{memory.title}</CardTitle>
           <CardDescription>{formatDate(memory.date)}</CardDescription>
