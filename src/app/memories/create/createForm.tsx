@@ -54,7 +54,7 @@ export default function CreateForm() {
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="Title" {...field} />
               </FormControl>
               <FormDescription></FormDescription>
               <FormMessage />
@@ -68,7 +68,7 @@ export default function CreateForm() {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea placeholder="Tell us about your memory" {...field} />
               </FormControl>
               <FormDescription></FormDescription>
               <FormMessage />
@@ -82,7 +82,10 @@ export default function CreateForm() {
             <FormItem>
               <FormLabel>Street View URL</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="Copy and past the street view URL"
+                  {...field}
+                />
               </FormControl>
               <FormDescription></FormDescription>
               <FormMessage />

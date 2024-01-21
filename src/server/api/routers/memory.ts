@@ -1,3 +1,4 @@
+import { desc, eq } from "drizzle-orm";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -16,6 +17,11 @@ export const memoryRouter = createTRPCRouter({
         createdById: ctx.session.user.id,
       });
       return { id: res.insertId };
+    }),
+  getAll: protectedProcedure
+    .query(async ({ ctx }) => {
+      return await ctx.db.select({ id: memories.id, title: memories.title, description: memories.description, date: memories.createdAt })
+        .from(memories).where(eq(memories.createdById, ctx.session.user.id)).orderBy(desc(memories.createdAt));
     }),
 });
 
