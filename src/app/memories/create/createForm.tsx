@@ -97,12 +97,13 @@ export default function CreateForm() {
       mapRef.current.getStreetView().setVisible(false);
 
       mapRef.current.getStreetView().addListener("position_changed", () => {
-        // console.log("position_changed");
+        console.log("position_changed");
         updateMemoryPosition({
-          long: mapRef.current?.getCenter()?.lng(),
-          lat: mapRef.current?.getCenter()?.lat(),
+          long: mapRef.current?.getStreetView().getLocation()?.latLng?.lng(),
+          lat: mapRef.current?.getStreetView()?.getLocation()?.latLng?.lat(),
         });
       });
+      
       mapRef.current.getStreetView().addListener("zoom_changed", () => {
         // console.log("zoom_changed");
         updateMemoryZoom({
