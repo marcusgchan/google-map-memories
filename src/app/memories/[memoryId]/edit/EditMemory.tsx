@@ -14,32 +14,43 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Textarea } from "~/components/ui/textarea";
-import { createSchema } from "~/types";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
-import { RouterOutputs } from "~/trpc/shared";
+import { type RouterOutputs } from "~/trpc/shared";
+import { z } from "zod";
 
-export function EditMemory({
-  memory,
-}: {
-  memory: RouterOutputs["memory"]["getById"];
-}) {
-  const form = useForm<z.infer<typeof createSchema>>({
-    resolver: zodResolver(createSchema),
+type Memory = NonNullable<RouterOutputs["memory"]["getById"]>;
+export const editSchema = z.object({
+  title: z.string().min(1, {
+    message: "Title must be at least 1 characters.",
+  }),
+  description: z.string().min(1, {
+    message: "Description must be at least 1 characters.",
+  }),
+  streetViewUrl: z.string().url({
+    message: "Street view url must be a valid url.",
+  }),
+});
+
+export function EditMemory({ memory }: { memory: Memory }) {
+  const form = useForm<z.infer<typeof editSchema>>({
+    resolver: zodResolver(editSchema),
     defaultValues: {
-      ...memory,
+      title: memory.title,
+      description: memory.description,
+      streetViewUrl: memory.streetViewUrl,
     },
   });
   const router = useRouter();
-  const mutation = api.memory.create.useMutation({
+  const mutation = api.memory.edit.useMutation({
     onSuccess({ id }) {
       router.push(`/memories/${id}`);
     },
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof createSchema>) {
-    mutation.mutate(values);
+  function onSubmit(values: z.infer<typeof editSchema>) {
+    mutation.mutate({ id: memory.id, ...values });
   }
   return (
     <Form {...form}>
@@ -47,7 +58,7 @@ export function EditMemory({
         onSubmit={form.handleSubmit(onSubmit)}
         className="mx-auto flex max-w-md flex-col gap-4 rounded-lg border-2 border-border p-4"
       >
-        <h1 className="text-4xl">Create a memory</h1>
+        <h1 className="text-4xl">Edit a memory</h1>
         <p>Capture a moment in google maps.</p>
         <FormField
           control={form.control}

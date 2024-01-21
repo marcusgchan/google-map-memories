@@ -25,7 +25,8 @@ export default async function Edit({
     <>
       <Header />
       <main>
-        <EditMemory memory={memory} />
+        {memory && <EditMemory memory={memory} />}
+        {!memory && <p>Memory not found</p>}
       </main>
     </>
   );
