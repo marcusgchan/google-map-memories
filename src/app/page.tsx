@@ -1,7 +1,4 @@
 import { Anchor } from "~/components/ui/anchor";
-import { Button } from "~/components/ui/button";
-import { getServerAuthSession } from "~/server/auth";
-import { api } from "~/trpc/server";
 
 export default async function Home() {
   return (
