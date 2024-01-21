@@ -1,7 +1,8 @@
 "use client";
 import Globe from "react-globe.gl";
 import { useState, useEffect } from "react";
-import GlowOrb from "/public/glow.png";
+// import GlowOrb from "/public/glow.png";
+import { api } from "~/trpc/react";
 // import { countriesGeoJson } from "./countries.geojson";
 
 export const InteractiveGlobe = () => {
@@ -20,6 +21,13 @@ export const InteractiveGlobe = () => {
     color: "#398AE9",
   }));
 
+  const {
+    data: memories,
+    isError,
+    isLoading,
+  } = api.memory.publicGetAll.useQuery();
+  console.log(memories);
+
   const [countries, setCountries] = useState({ features: [] });
   useEffect(() => {
     // load data
@@ -27,7 +35,6 @@ export const InteractiveGlobe = () => {
       try {
         const response = await fetch("countries.geojson");
         const data = await response.json();
-        console.log(data);
         setCountries(data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -75,9 +82,9 @@ export const InteractiveGlobe = () => {
               width="941"
               height="941"
               filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
+              colorInterpolationFilters="sRGB"
             >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
+              <feFlood floodOpacity="0" result="BackgroundImageFix" />
               <feBlend
                 mode="normal"
                 in="SourceGraphic"
@@ -96,9 +103,9 @@ export const InteractiveGlobe = () => {
               width="1048.11"
               height="985.085"
               filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
+              colorInterpolationFilters="sRGB"
             >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
+              <feFlood floodOpacity="0" result="BackgroundImageFix" />
               <feBlend
                 mode="normal"
                 in="SourceGraphic"
@@ -117,9 +124,9 @@ export const InteractiveGlobe = () => {
               width="1266"
               height="1009"
               filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
+              colorInterpolationFilters="sRGB"
             >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
+              <feFlood floodOpacity="0" result="BackgroundImageFix" />
               <feBlend
                 mode="normal"
                 in="SourceGraphic"
@@ -146,7 +153,6 @@ export const InteractiveGlobe = () => {
           const color = `#${Math.round(Math.random() * Math.pow(2, 24))
             .toString(16)
             .padStart(6, "0")}`;
-          console.log(color);
           return "#ffffff";
         }}
         htmlElementsData={gData}
