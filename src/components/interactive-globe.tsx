@@ -1,9 +1,8 @@
 "use client";
 import Globe from "react-globe.gl";
-import { useState, useEffect } from "react";
-// import GlowOrb from "/public/glow.png";
+import { useState, useEffect, useRef } from "react";
+import GlowOrb from "/public/glow.png";
 import { api } from "~/trpc/react";
-// import { countriesGeoJson } from "./countries.geojson";
 
 export const InteractiveGlobe = () => {
   const markerSvg = `<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -21,6 +20,7 @@ export const InteractiveGlobe = () => {
     color: "#398AE9",
   }));
 
+  const globeEl = useRef();
   const {
     data: memories,
     isError,
@@ -44,10 +44,13 @@ export const InteractiveGlobe = () => {
     fetchData();
   }, []);
 
-  if (countries.features.length === 0) {
-    return <span>loading...</span>;
-  }
-  // console.log(countriesGeoJson);
+  useEffect(() => {
+    if (globeEl.current) {
+      globeEl.current.pointOfView({
+        altitude: 1.75,
+      });
+    }
+  }, [globeEl]);
 
   return (
     <article>
@@ -142,6 +145,7 @@ export const InteractiveGlobe = () => {
         </svg>
       </div>
       <Globe
+        ref={globeEl}
         backgroundColor="rgba(0,0,0,0)"
         showAtmosphere={false}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
@@ -149,12 +153,7 @@ export const InteractiveGlobe = () => {
         hexPolygonResolution={3}
         hexPolygonMargin={0.3}
         hexPolygonUseDots={true}
-        hexPolygonColor={() => {
-          const color = `#${Math.round(Math.random() * Math.pow(2, 24))
-            .toString(16)
-            .padStart(6, "0")}`;
-          return "#ffffff";
-        }}
+        hexPolygonColor={() => "#ffffff"}
         htmlElementsData={gData}
         htmlElement={(d) => {
           const el = document.createElement("div");
@@ -168,11 +167,13 @@ export const InteractiveGlobe = () => {
           return el;
         }}
       />
-      {/* <img
-        src={GlowOrb.src}
-        alt="glow orb"
-        className="absolute left-0 top-0 w-4/5"
-      /> */}
+      <div className="flex h-full w-full items-center justify-center">
+        <img
+          src={GlowOrb.src}
+          alt="glow orb"
+          className=" pointer-events-none absolute inset-0 ml-[23.5%] mr-auto mt-[15%] w-[55%]"
+        />
+      </div>
     </article>
   );
 };
