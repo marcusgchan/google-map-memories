@@ -19,11 +19,13 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const mysqlTable = mysqlTableCreator((name) => `google-map-memories_${name}`);
 
-export const posts = mysqlTable(
-  "post",
+export const memories = mysqlTable(
+  "memories",
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-    name: varchar("name", { length: 256 }),
+    title: varchar("title", { length: 256 }),
+    description: varchar("description", { length: 1000 }),
+    streetViewUrl: varchar("streetViewUrl", { length: 1000 }),
     createdById: varchar("createdById", { length: 255 }).notNull(),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
@@ -32,7 +34,7 @@ export const posts = mysqlTable(
   },
   (example) => ({
     createdByIdIdx: index("createdById_idx").on(example.createdById),
-    nameIndex: index("name_idx").on(example.name),
+    titleIndex: index("title_idx").on(example.title),
   })
 );
 
