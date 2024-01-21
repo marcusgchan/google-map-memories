@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import GlowOrb from "/public/glow.png";
 import { api } from "~/trpc/react";
 
-export const InteractiveGlobe = () => {
+const InteractiveGlobe = () => {
   const markerSvg = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path fill-rule="evenodd" clip-rule="evenodd" d="M10 18.7234C14.8178 18.7234 18.7234 14.8178 18.7234 10C18.7234 5.1822 14.8178 1.2766 10 1.2766C5.1822 1.2766 1.2766 5.1822 1.2766 10C1.2766 14.8178 5.1822 18.7234 10 18.7234ZM10 20C15.5228 20 20 15.5228 20 10C20 4.47715 15.5228 0 10 0C4.47715 0 0 4.47715 0 10C0 15.5228 4.47715 20 10 20Z" fill="#398AE9"/>
   <path d="M15.7447 10C15.7447 13.1727 13.1727 15.7447 10 15.7447C6.8273 15.7447 4.25532 13.1727 4.25532 10C4.25532 6.8273 6.8273 4.25532 10 4.25532C13.1727 4.25532 15.7447 6.8273 15.7447 10Z" fill="#398AE9"/>
@@ -184,3 +184,5 @@ export const InteractiveGlobe = () => {
     </article>
   );
 };
+
+export default InteractiveGlobe;

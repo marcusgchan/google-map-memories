@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { Anchor } from "~/components/ui/anchor";
-import { InteractiveGlobe } from "~/components/interactive-globe.jsx";
 import { getServerAuthSession } from "~/server/auth";
+import dynamic from "next/dynamic";
+
+const Globe = dynamic(() => import("~/components/interactive-globe"), {
+  ssr: false,
+});
 
 export default async function Home() {
   const session = await getServerAuthSession();
@@ -26,7 +30,7 @@ export default async function Home() {
           memories of Google Maps
         </h1>
         <article>
-          <InteractiveGlobe />
+          <Globe />
         </article>
       </main>
     </>
