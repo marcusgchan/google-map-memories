@@ -1,9 +1,8 @@
 "use client";
 import Globe from "react-globe.gl";
-import { useState, useEffect } from "react";
-// import GlowOrb from "/public/glow.png";
+import { useState, useEffect, useRef, memo } from "react";
+import GlowOrb from "/public/glow.png";
 import { api } from "~/trpc/react";
-// import { countriesGeoJson } from "./countries.geojson";
 
 export const InteractiveGlobe = () => {
   const markerSvg = `<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -13,20 +12,29 @@ export const InteractiveGlobe = () => {
   `;
 
   // Gen random data
-  const N = 30;
-  const gData = [...Array(N).keys()].map(() => ({
-    lat: (Math.random() - 0.5) * 180,
-    lng: (Math.random() - 0.5) * 360,
-    size: 7 + Math.random() * 30,
-    color: "#398AE9",
-  }));
+  // const N = 30;
+  // const gData = [...Array(N).keys()].map(() => ({
+  //   lat: (Math.random() - 0.5) * 180,
+  //   lng: (Math.random() - 0.5) * 360,
+  //   size: 7 + Math.random() * 30,
+  //   color: "#398AE9",
+  // }));
+  // console.log(gData);
 
+  const globeEl = useRef();
   const {
-    data: memories,
+    data: memories = [],
     isError,
     isLoading,
   } = api.memory.publicGetAll.useQuery();
-  console.log(memories);
+
+  const gData = memories.map((lat) => ({
+    lat: lat.lat,
+    lng: lat.long,
+    size: 7 + Math.random() * 30,
+    color: "#398AE9",
+  }));
+  console.log(gData);
 
   const [countries, setCountries] = useState({ features: [] });
   useEffect(() => {
@@ -44,10 +52,18 @@ export const InteractiveGlobe = () => {
     fetchData();
   }, []);
 
-  if (countries.features.length === 0) {
-    return <span>loading...</span>;
-  }
-  // console.log(countriesGeoJson);
+  useEffect(() => {
+    if (globeEl.current) {
+      globeEl.current.pointOfView({
+        altitude: 1.7,
+      });
+      const controls = globeEl.current.controls();
+      controls.enableZoom = false;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.25;
+      controls.update();
+    }
+  }, [globeEl]);
 
   return (
     <article>
@@ -142,6 +158,7 @@ export const InteractiveGlobe = () => {
         </svg>
       </div>
       <Globe
+        ref={globeEl}
         backgroundColor="rgba(0,0,0,0)"
         showAtmosphere={false}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
@@ -149,12 +166,7 @@ export const InteractiveGlobe = () => {
         hexPolygonResolution={3}
         hexPolygonMargin={0.3}
         hexPolygonUseDots={true}
-        hexPolygonColor={() => {
-          const color = `#${Math.round(Math.random() * Math.pow(2, 24))
-            .toString(16)
-            .padStart(6, "0")}`;
-          return "#ffffff";
-        }}
+        hexPolygonColor={() => "#ffffff"}
         htmlElementsData={gData}
         htmlElement={(d) => {
           const el = document.createElement("div");
@@ -164,15 +176,23 @@ export const InteractiveGlobe = () => {
 
           el.style["pointer-events"] = "auto";
           el.style.cursor = "pointer";
+
+          const hoverEl = document.createElement("div");
+          hoverEl.textContent = "hello";
+
           el.onclick = () => console.info(d);
+          el.onmouseenter = () => el.appendChild(hoverEl);
+          el.onmouseleave = () => el.removeChild(hoverEl);
           return el;
         }}
       />
-      {/* <img
-        src={GlowOrb.src}
-        alt="glow orb"
-        className="absolute left-0 top-0 w-4/5"
-      /> */}
+      <div className="flex h-full w-full items-center justify-center">
+        <img
+          src={GlowOrb.src}
+          alt="glow orb"
+          className=" pointer-events-none absolute inset-0 ml-[23.5%] mr-auto mt-[16%] w-[55%]"
+        />
+      </div>
     </article>
   );
 };

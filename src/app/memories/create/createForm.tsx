@@ -27,12 +27,18 @@ const Map = dynamic(() => import("./Map").then((r) => r.default), {
 });
 
 const mapMemorySchema = z.object({
-  long: z.number(),
-  lat: z.number(),
-  pitch: z.number(),
-  fov: z.number(),
-  heading: z.number(),
-  zoom: z.number(),
+  position: z.object({
+    long: z.number(),
+    lat: z.number(),
+  }),
+  pov: z.object({
+    pitch: z.number(),
+    heading: z.number(),
+  }),
+  zoom: z.object({
+    fov: z.number(),
+    zoom: z.number(),
+  }),
 });
 
 const createFormSchema = z.object({
@@ -43,14 +49,22 @@ const createFormSchema = z.object({
     message: "Description must be at least 1 characters.",
   }),
 });
-
-export type MapMemoryData = {
+export type MapMemoryPosition = {
   long: number | undefined;
   lat: number | undefined;
+};
+export type MapMemoryPov = {
   pitch: number | undefined;
   heading: number | undefined;
+};
+export type MapMemoryZoom = {
   fov: number | undefined;
   zoom: number | undefined;
+};
+export type MapMemoryData = {
+  position: MapMemoryPosition | undefined;
+  pov: MapMemoryPov | undefined;
+  zoom: MapMemoryZoom | undefined;
 };
 
 export default function CreateForm() {
@@ -96,9 +110,29 @@ export default function CreateForm() {
         console.error("Error fetching places:", error);
       });
   };
-  const mapMemoryDataRef = useRef<MapMemoryData>();
-  const updateMemoryData = (data: MapMemoryData) => {
-    mapMemoryDataRef.current = data;
+
+  const mapMemoryDataRef = useRef<MapMemoryData>({
+    position: undefined,
+    pov: undefined,
+    zoom: undefined,
+  });
+  const updateMemoryPosition = (data: MapMemoryPosition) => {
+    if (!mapMemoryDataRef.current) {
+      return;
+    }
+    mapMemoryDataRef.current.position = data;
+  };
+  const updateMemoryZoom = (data: MapMemoryZoom) => {
+    if (!mapMemoryDataRef.current) {
+      return;
+    }
+    mapMemoryDataRef.current.zoom = data;
+  };
+  const updateMemoryPov = (data: MapMemoryPov) => {
+    if (!mapMemoryDataRef.current) {
+      return;
+    }
+    mapMemoryDataRef.current.pov = data;
   };
   const form = useForm<z.infer<typeof createFormSchema>>({
     resolver: zodResolver(createFormSchema),
@@ -118,13 +152,17 @@ export default function CreateForm() {
   function onSubmit(values: z.infer<typeof createFormSchema>) {
     const res = mapMemorySchema.safeParse(mapMemoryDataRef.current);
     if (!res.success) {
-      console.log(mapMemoryDataRef.current);
       toast("Please find a steet view location", {
         cancel: { label: "close" },
       });
       return;
     }
-    mutation.mutate({ ...values, ...res.data });
+    mutation.mutate({
+      ...values,
+      ...res.data.position,
+      ...res.data.pov,
+      ...res.data.zoom,
+    });
   }
   return (
     <Form {...form}>
@@ -174,8 +212,11 @@ export default function CreateForm() {
             <Button onClick={onSearchClicked}>Search</Button>
           </div>
         </FormItem>
-
-        <Map updateMemoryData={updateMemoryData} />
+        <Map
+          updateMemoryPosition={updateMemoryPosition}
+          updateMemoryPov={updateMemoryPov}
+          updateMemoryZoom={updateMemoryZoom}
+        />
         <Button>Submit</Button>
       </form>
     </Form>
